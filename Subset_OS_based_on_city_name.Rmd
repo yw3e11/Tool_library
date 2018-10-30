@@ -1,0 +1,39 @@
+---
+title: "Select_OS_based_on_city_name"
+author: "Phil Yue Wu"
+date: "10/30/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The code below uses "Nottingham" as an example. 
+
+```{r}
+# Get header from OS scheme
+os_header <- read.csv("../OS_addressPlus/addressbase-plus-header.csv", header = F) %>% 
+  gather(key = "key", value = "value")
+
+# Generate a full list of csv files (n=30)
+list_os_csv <- list.files(path = "../OS_addressPlus/AddressPluss_original/", full.names = T)
+
+# Create a function to iterate over each csv
+find_os_csv <- function(x){
+  temp_csv <- read_csv(file = x, col_names = F, col_types = list(X27 = col_character(), 
+                                                                 X33 = col_character()) ) 
+  temp_csv <- temp_csv%>% 
+    filter(X61 == "NOTTINGHAM") # X61 column is the LA name, X62 is slightly different
+  
+  return(temp_csv)
+}
+
+OS_nottingham <- lapply(list_os_csv, find_os_csv) %>%  
+  bind_rows() %>% 
+  setnames(os_header$value) # replace header 
+
+
+OS_nottingham_original <- OS_nottingham # always good idea to back up as the iterator takes long time
+```
